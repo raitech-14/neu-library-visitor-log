@@ -238,7 +238,7 @@ View System Demonstration Video
 The system can be accessed online through the following link:
 </p>
 
-<a href="https://yourproject.infinityfreeapp.com">
+<a href="neulibraryvisitor.infinityfree.me">
 Open NEU Library Visitor Log System
 </a>
 
