@@ -162,23 +162,6 @@
 
 <hr>
 
-<h2>Installation Guide</h2>
-<ol>
-  <li>Install <strong>XAMPP</strong> on your computer.</li>
-  <li>Copy the project folder to:
-    <pre>C:\xampp\htdocs\NEULib</pre>
-  </li>
-  <li>Start <strong>Apache</strong> and <strong>MySQL</strong> in XAMPP.</li>
-  <li>Open <strong>phpMyAdmin</strong> in your browser:
-    <pre>http://localhost/phpmyadmin</pre>
-  </li>
-  <li>Create the database and import the required SQL tables.</li>
-  <li>Open the system in your browser:
-    <pre>http://localhost/NEULib</pre>
-  </li>
-</ol>
-<hr>
-
 <h2>Automatic Visitor Registration</h2>
 
 <p>
@@ -213,23 +196,6 @@ If the visitor is marked as <strong>blocked</strong> by the administrator, the s
   <li><strong>Email:</strong> admin@neu.edu.ph</li>
   <li><strong>Password:</strong> admin123</li>
 </ul>
-
-<hr>
-
-<h2>System Demonstration Video</h2>
-
-<p>
-A video demonstration of the NEU Library Visitor Log System showing the visitor check-in process,
-admin dashboard, visitor logs, and blocked visitor warning.
-</p>
-
-<p>
-Watch the demo here:
-</p>
-
-<a href="PASTE_YOUR_GOOGLE_DRIVE_LINK_HERE">
-View System Demonstration Video
-</a>
 
 <hr>
 
