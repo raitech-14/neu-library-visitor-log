@@ -1,11 +1,18 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "visitor_log";
+// db.php - connection to Supabase (PostgreSQL)
 
-$conn = new mysqli($host, $user, $pass, $dbname);
+// Get credentials from environment variables
+$host   = getenv('DB_HOST');
+$dbname = getenv('DB_NAME');
+$user   = getenv('DB_USER');
+$pass   = getenv('DB_PASS');
+$port   = getenv('DB_PORT') ?: 5432; // default port if not set
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+try {
+    // Connect using PDO
+    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // echo "Connected successfully"; // optional for testing
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
 }

@@ -1,8 +1,7 @@
 <<<<<<< HEAD
 <?php
 require_once 'vendor/autoload.php';
-=======
-<?php
-require_once 'vendor/autoload.php';
->>>>>>> 3dd07543472475057b3aa40fa4d6caf9c87cc434
-echo "Composer loaded successfully!";
+
+$client = new Google_Client();
+$client->setClientId('262675545609-93ef8hfqe4rblftgt3q4m5mhrivm11u5.apps.googleusercontent.com');
+$client->setClientSecret('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');
