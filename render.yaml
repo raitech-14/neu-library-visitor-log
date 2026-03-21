@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: hiking-journal
+    env: php
+    phpVersion: 8.2
+    buildCommand: ""
+    startCommand: "php -S 0.0.0.0:10000"
+    extensions:
+      - pdo_pgsql
+      - pgsql
