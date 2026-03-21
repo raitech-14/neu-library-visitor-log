@@ -95,7 +95,7 @@ if (isset($_SESSION['message'])) {
         body {
             margin: 0;
             min-height: 100vh;
-            background: url('assets/background.png') no-repeat center center/cover;
+            background: url('background.png') no-repeat center center/cover;
             position: relative;
         }
 
