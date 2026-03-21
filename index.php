@@ -122,7 +122,7 @@
         }
 
         body {
-            background: url('assets/background.png') no-repeat center center/cover;
+            background: url('background.png') no-repeat center center/cover;
         }
 
         @media (max-width: 480px) {
@@ -229,7 +229,7 @@
 
     <div class="topbar">
         <div class="topbar-left">
-            <img src="assets/logo.png" class="logo">
+            <img src="logo.png" class="logo">
             <h1 class="brand">New Era Library</h1>
         </div>
     </div>
