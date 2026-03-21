@@ -587,7 +587,7 @@ if ($college_result && $college_result->num_rows > 0) {
     <div class="topbar">
 
     <div class="topbar-left">
-        <img src="assets/logo.png" class="logo-img">
+        <img src="logo.png" class="logo-img">
 
         <div class="logo-text">
             <h2>NEU Library</h2>
