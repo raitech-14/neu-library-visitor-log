@@ -5,8 +5,7 @@ $client = new Google_Client();
 
 $client->setClientId(getenv('GOOGLE_CLIENT_ID'));
 $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET'));
-
-$client->setRedirectUri('https://your-app.onrender.com/google-callback.php');
+$client->setRedirectUri(getenv('GOOGLE_REDIRECT_URI'));
 
 $client->addScope("email");
 $client->addScope("profile");
