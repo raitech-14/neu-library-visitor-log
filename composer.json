@@ -1,9 +1,5 @@
 {
     "require": {
-<<<<<<< HEAD
-        "google/apiclient": "2.16"
-=======
         "google/apiclient": "^2.16"
->>>>>>> 3dd07543472475057b3aa40fa4d6caf9c87cc434
     }
 }
