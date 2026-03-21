@@ -378,4 +378,8 @@ visitorType.addEventListener("change", updatePurpose);
     </script>
 
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> 5b9960e39d8844aaad580c2a7deaac3cb68780ee

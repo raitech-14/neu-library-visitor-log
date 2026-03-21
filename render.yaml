@@ -8,3 +8,5 @@ services:
     extensions:
       - pdo_pgsql
       - pgsql
+      - pgsql
+
