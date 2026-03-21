@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         body {
             margin: 0;
             min-height: 100vh;
-            background: url('assets/background.png') no-repeat center center/cover;
+            background: url('background.png') no-repeat center center/cover;
             position: relative;
         }
 
@@ -223,7 +223,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
-
 
     <div class="page-wrap">
     <div class="login-card">
