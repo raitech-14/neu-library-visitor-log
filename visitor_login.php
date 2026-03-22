@@ -242,7 +242,7 @@ if (isset($_SESSION['message'])) {
 <div class="page-wrap">
 
     <div class="left-panel">
-        <img src="assets/logo.png" class="main-logo">
+        <img src="logo.png" class="main-logo">
 
         <h2 class="uni-name">New Era University</h2>
         <h1 class="library-text">Library</h1>
