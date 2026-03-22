@@ -5,11 +5,14 @@ $db   = getenv('DB_NAME');
 $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
 
-// Create PostgreSQL connection
-$conn = pg_connect("host=$host port=$port dbname=$db user=$user password=$pass");
-
-if (!$conn) {
-    die("PostgreSQL connection failed.");
+try {
+    // This creates the $pdo object that your callback is looking for
+    $dsn = "pgsql:host=$host;port=$port;dbname=$db";
+    $pdo = new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    // If this fails, it's likely because your getenv variables are empty
+    die("Database connection failed: " . $e->getMessage());
 }
-// Connection successful, ready for callback.php
 ?>
