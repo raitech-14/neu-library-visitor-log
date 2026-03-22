@@ -1,30 +1,22 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Manila');
-include 'db.php';
+include 'db.php'; // This provides $pdo
 
 if (!isset($_SESSION['admin'])) {
     header("Location: admin_login.php");
     exit();
 }
 
+// --- Action Handling (Block/Unblock) ---
 if (isset($_GET['action']) && isset($_GET['user_id'])) {
     $user_id = (int) $_GET['user_id'];
     $action = $_GET['action'];
+    $status = ($action === 'block') ? 1 : 0;
 
-    if ($action === 'block') {
-        $sql_block = "UPDATE users SET is_blocked = 1 WHERE id = ? AND role = 'visitor'";
-        $stmt_block = $conn->prepare($sql_block);
-        $stmt_block->bind_param("i", $user_id);
-        $stmt_block->execute();
-    }
-
-    if ($action === 'unblock') {
-        $sql_unblock = "UPDATE users SET is_blocked = 0 WHERE id = ? AND role = 'visitor'";
-        $stmt_unblock = $conn->prepare($sql_unblock);
-        $stmt_unblock->bind_param("i", $user_id);
-        $stmt_unblock->execute();
-    }
+    $sql_action = "UPDATE users SET is_blocked = :status WHERE id = :id AND role = 'visitor'";
+    $stmt_action = $pdo->prepare($sql_action);
+    $stmt_action->execute(['status' => $status, 'id' => $user_id]);
 
     header("Location: dashboard.php");
     exit();
@@ -34,25 +26,27 @@ $today = date("Y-m-d");
 $currentMonth = date("m");
 $currentYear = date("Y");
 
-$daily_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE visit_date = ?");
-$daily_stmt->bind_param("s", $today);
-$daily_stmt->execute();
-$daily_result = $daily_stmt->get_result();
-$daily = $daily_result->fetch_assoc()['total'];
+// --- Statistics ---
 
-$weekly_query = $conn->query("SELECT COUNT(*) AS total FROM visit_logs WHERE YEARWEEK(visit_date, 1) = YEARWEEK(CURDATE(), 1)");
-$weekly = $weekly_query->fetch_assoc()['total'];
+// Daily
+$daily_stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE visit_date = :today");
+$daily_stmt->execute(['today' => $today]);
+$daily = $daily_stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-$monthly_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE MONTH(visit_date) = ? AND YEAR(visit_date) = ?");
-$monthly_stmt->bind_param("ss", $currentMonth, $currentYear);
-$monthly_stmt->execute();
-$monthly_result = $monthly_stmt->get_result();
-$monthly = $monthly_result->fetch_assoc()['total'];
+// Weekly (Postgres version of YearWeek)
+$weekly_query = $pdo->query("SELECT COUNT(*) AS total FROM visit_logs WHERE date_trunc('week', visit_date) = date_trunc('week', now())");
+$weekly = $weekly_query->fetch(PDO::FETCH_ASSOC)['total'];
 
-$total_users_query = $conn->query("SELECT COUNT(*) AS total FROM users WHERE role = 'visitor'");
-$total_users = $total_users_query->fetch_assoc()['total'];
+// Monthly
+$monthly_stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE EXTRACT(MONTH FROM visit_date) = :month AND EXTRACT(YEAR FROM visit_date) = :year");
+$monthly_stmt->execute(['month' => $currentMonth, 'year' => $currentYear]);
+$monthly = $monthly_stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
+// Total Users
+$total_users_query = $pdo->query("SELECT COUNT(*) AS total FROM users WHERE role = 'visitor'");
+$total_users = $total_users_query->fetch(PDO::FETCH_ASSOC)['total'];
 
+// --- Search & Filter Logic ---
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $from_date = isset($_GET['from_date']) ? trim($_GET['from_date']) : '';
 $to_date = isset($_GET['to_date']) ? trim($_GET['to_date']) : '';
@@ -63,72 +57,51 @@ $sql = "SELECT visit_logs.*, users.full_name, users.email, users.college, users.
         WHERE users.role = 'visitor'";
 
 $params = [];
-$types = "";
 
 if ($search !== '') {
-    $sql .= " AND (
-        users.full_name LIKE ?
-        OR users.email LIKE ?
-        OR users.college LIKE ?
-        OR users.visitor_type LIKE ?
-        OR visit_logs.purpose LIKE ?
-    )";
-
+    $sql .= " AND (users.full_name ILIKE :s1 OR users.email ILIKE :s2 OR users.college ILIKE :s3 OR users.visitor_type ILIKE :s4 OR visit_logs.purpose ILIKE :s5)";
     $search_like = "%{$search}%";
-    $params[] = $search_like;
-    $params[] = $search_like;
-    $params[] = $search_like;
-    $params[] = $search_like;
-    $params[] = $search_like;
-    $types .= "sssss";
+    $params['s1'] = $params['s2'] = $params['s3'] = $params['s4'] = $params['s5'] = $search_like;
 }
 
 if ($from_date !== '' && $to_date !== '') {
-    $sql .= " AND visit_logs.visit_date BETWEEN ? AND ?";
-    $params[] = $from_date;
-    $params[] = $to_date;
-    $types .= "ss";
+    $sql .= " AND visit_logs.visit_date BETWEEN :from AND :to";
+    $params['from'] = $from_date;
+    $params['to'] = $to_date;
 }
 
 $sql .= " ORDER BY visit_logs.visit_date DESC, visit_logs.visit_time DESC, visit_logs.id DESC";
 
-$stmt = $conn->prepare($sql);
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$results_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$total_results = count($results_list);
 
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-
-$stmt->execute();
-$result = $stmt->get_result();
-
-$total_results = $result->num_rows;
-
+// --- College Chart Data ---
 $college_sql = "SELECT users.college, COUNT(visit_logs.id) AS total
                 FROM visit_logs
                 INNER JOIN users ON visit_logs.user_id = users.id
                 WHERE users.role = 'visitor'
                 GROUP BY users.college
                 ORDER BY total DESC";
-$college_result = $conn->query($college_sql);
+$college_stmt = $pdo->query($college_sql);
+$college_rows = $college_stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$collegeLabels = [];
+$collegeCounts = [];
+foreach ($college_rows as $c) {
+    $collegeLabels[] = !empty($c['college']) ? $c['college'] : 'N/A';
+    $collegeCounts[] = (int)$c['total'];
+}
+
+// --- Recent Activity ---
 $activity_sql = "SELECT users.full_name, visit_logs.visit_time, visit_logs.visit_date
                  FROM visit_logs
                  INNER JOIN users ON visit_logs.user_id = users.id
                  ORDER BY visit_logs.id DESC
                  LIMIT 5";
-
-$activity_result = $conn->query($activity_sql);
-
-
-$collegeLabels = [];
-$collegeCounts = [];
-
-if ($college_result && $college_result->num_rows > 0) {
-    while ($college = $college_result->fetch_assoc()) {
-        $collegeLabels[] = !empty($college['college']) ? $college['college'] : 'N/A';
-        $collegeCounts[] = (int)$college['total'];
-    }
-}
+$activity_stmt = $pdo->query($activity_sql);
+$activities = $activity_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 
@@ -852,4 +825,3 @@ window.onclick = function(e) {
 </script>
 </body>
 </html>
->>>>>>> 3dd07543472475057b3aa40fa4d6caf9c87cc434
