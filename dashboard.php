@@ -31,6 +31,7 @@ if (isset($_GET['action']) && isset($_GET['user_id'])) {
     // 4. Redirect back
     header("Location: dashboard.php");
     exit();
+}
     
 $today = date("Y-m-d");
 $currentMonth = (int)date("m");
