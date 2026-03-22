@@ -23,7 +23,7 @@ This system allows students, faculty, staff, and visitors to check in digitally 
 <h2>🌐 Live Website</h2>
 <p>
 👉 <a href="https://neu-library-visitor-log.onrender.com" target="_blank">
-https://your-app-url.onrender.com
+Live Website Link
 </a>
 </p>
 
