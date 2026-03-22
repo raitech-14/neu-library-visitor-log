@@ -1,11 +1,14 @@
 <?php
 session_start();
-include 'functions.php';
+include 'functions.php'; 
 
 $name = $_SESSION['blocked_name'] ?? "Visitor";
 
-if (isset($_SESSION['blocked_name'])) {
+if (isset($_SESSION['blocked_name'])) 
     logActivity($pdo, "Attempted login by blocked user: $name", "System");
+    session_destroy();
+    header("Location: access_denied.php");
+    exit(); 
 }
 ?>
 
