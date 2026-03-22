@@ -3,14 +3,13 @@ session_start();
 require_once 'google-config.php';
 include 'db.php';
 
-// Create the Google login URL
 $google_login_url = $client->createAuthUrl();
 
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
-    $password = md5($_POST['password']); // kung ganyan ang hash mo
+    $password = md5($_POST['password']); 
 
     $sql = "SELECT * FROM users WHERE email = ? AND password = ? AND role = 'admin'";
     $stmt = $conn->prepare($sql);
@@ -44,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         body {
             margin: 0;
             min-height: 100vh;
-            background: url('assets/background.png') no-repeat center center/cover;
+            background: url('background.png') no-repeat center center/cover;
             position: relative;
         }
 
@@ -222,7 +221,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
-
 
     <div class="page-wrap">
     <div class="login-card">
