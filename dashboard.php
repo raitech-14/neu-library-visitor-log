@@ -1,49 +1,49 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Manila');
-include 'db.php'; // This provides $pdo
+include 'db.php'; // This must provide the $pdo variable
 
 if (!isset($_SESSION['admin'])) {
     header("Location: admin_login.php");
     exit();
 }
 
-// --- Action Handling ---
 if (isset($_GET['action']) && isset($_GET['user_id'])) {
     $user_id = (int) $_GET['user_id'];
     $action = $_GET['action'];
-    $is_blocked = ($action === 'block') ? 1 : 0;
+    $val = ($action === 'block') ? 1 : 0;
 
-    // Fixed: Changed $conn to $pdo and used PDO syntax
-    $sql_update = "UPDATE users SET is_blocked = :block WHERE id = :id AND role = 'visitor'";
-    $stmt_update = $pdo->prepare($sql_update);
-    $stmt_update->execute(['block' => $is_blocked, 'id' => $user_id]);
+    // Fixed for PDO
+    $sql_act = "UPDATE users SET is_blocked = ? WHERE id = ? AND role = 'visitor'";
+    $stmt_act = $pdo->prepare($sql_act);
+    $stmt_act->execute([$val, $user_id]);
 
     header("Location: dashboard.php");
     exit();
 }
 
 $today = date("Y-m-d");
-$currentMonth = date("m");
-$currentYear = date("Y");
+$currentMonth = (int)date("m");
+$currentYear = (int)date("Y");
 
-// --- Statistics (Converted to PDO) ---
+// Daily Stats - Fixed for PDO
 $daily_stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE visit_date = ?");
 $daily_stmt->execute([$today]);
 $daily = $daily_stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-// PostgreSQL doesn't have YEARWEEK, so we use date_trunc
+// Weekly Stats - PostgreSQL version of YEARWEEK
 $weekly_query = $pdo->query("SELECT COUNT(*) AS total FROM visit_logs WHERE date_trunc('week', visit_date) = date_trunc('week', now())");
 $weekly = $weekly_query->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
+// Monthly Stats - PostgreSQL version of MONTH/YEAR
 $monthly_stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE EXTRACT(MONTH FROM visit_date) = ? AND EXTRACT(YEAR FROM visit_date) = ?");
-$monthly_stmt->execute([(int)$currentMonth, (int)$currentYear]);
+$monthly_stmt->execute([$currentMonth, $currentYear]);
 $monthly = $monthly_stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
+// Total Users
 $total_users_query = $pdo->query("SELECT COUNT(*) AS total FROM users WHERE role = 'visitor'");
 $total_users = $total_users_query->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-// --- Search and Filter ---
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $from_date = isset($_GET['from_date']) ? trim($_GET['from_date']) : '';
 $to_date = isset($_GET['to_date']) ? trim($_GET['to_date']) : '';
@@ -59,7 +59,7 @@ if ($search !== '') {
     // ILIKE is used for case-insensitive search in Postgres
     $sql .= " AND (users.full_name ILIKE ? OR users.email ILIKE ? OR users.college ILIKE ? OR users.visitor_type ILIKE ? OR visit_logs.purpose ILIKE ?)";
     $search_like = "%{$search}%";
-    for($i=0; $i<5; $i++) $params[] = $search_like;
+    $params = array_fill(0, 5, $search_like);
 }
 
 if ($from_date !== '' && $to_date !== '') {
@@ -72,10 +72,11 @@ $sql .= " ORDER BY visit_logs.visit_date DESC, visit_logs.visit_time DESC, visit
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
-$result = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetching as an array
+// We fetch it all as an array so your existing loops work
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC); 
 $total_results = count($result);
 
-// --- College Data ---
+// College Chart Data
 $college_sql = "SELECT users.college, COUNT(visit_logs.id) AS total
                 FROM visit_logs
                 INNER JOIN users ON visit_logs.user_id = users.id
@@ -84,7 +85,7 @@ $college_sql = "SELECT users.college, COUNT(visit_logs.id) AS total
                 ORDER BY total DESC";
 $college_result = $pdo->query($college_sql)->fetchAll(PDO::FETCH_ASSOC);
 
-// --- Activity Data ---
+// Recent Activity
 $activity_sql = "SELECT users.full_name, visit_logs.visit_time, visit_logs.visit_date
                  FROM visit_logs
                  INNER JOIN users ON visit_logs.user_id = users.id
@@ -94,6 +95,7 @@ $activity_result = $pdo->query($activity_sql)->fetchAll(PDO::FETCH_ASSOC);
 
 $collegeLabels = [];
 $collegeCounts = [];
+
 foreach ($college_result as $college) {
     $collegeLabels[] = !empty($college['college']) ? $college['college'] : 'N/A';
     $collegeCounts[] = (int)$college['total'];
@@ -649,8 +651,8 @@ foreach ($college_result as $college) {
             </div>
 
             <ul class="recent-list">
-                <?php if ($activity_result && $activity_result->num_rows > 0): ?>
-                    <?php while ($act = $activity_result->fetch_assoc()): ?>
+                <?php if (!empty($activity_result)): ?>
+                    <?php foreach ($activity_result as $act): ?>
                         <li>
                             <strong><?php echo htmlspecialchars($act['full_name']); ?></strong>
                             <span>
@@ -715,8 +717,8 @@ foreach ($college_result as $college) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if ($result && $result->num_rows > 0): ?>
-                            <?php while ($row = $result->fetch_assoc()): ?>
+                        <?php if (!empty($result)): ?>
+                            <?php foreach ($result as $row): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['full_name']); ?></td>
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
