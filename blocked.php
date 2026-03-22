@@ -1,6 +1,12 @@
 <?php
 session_start();
+include 'functions.php';
+
 $name = $_SESSION['blocked_name'] ?? "Visitor";
+
+if (isset($_SESSION['blocked_name'])) {
+    logActivity($pdo, "Attempted login by blocked user: $name", "System");
+}
 ?>
 
 <!DOCTYPE html>
