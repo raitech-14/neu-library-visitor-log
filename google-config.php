@@ -5,5 +5,5 @@ $client = new Google_Client();
 $client->setAuthConfig('credentials.json'); 
 $client->addScope("email");
 $client->addScope("profile");
-$client->setRedirectUri('https://neu-library-visitor-log.onrender.com/callback.php');
+$client->setRedirectUri('https://neu-library-visitor-log.onrender.com/google-callback.php');
 ?>
