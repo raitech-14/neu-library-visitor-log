@@ -6,12 +6,15 @@ $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
 
 try {
-    $dsn = "pgsql:host=$host;port=$port;dbname=$db;";
+    // Ensure there are no spaces or typos inside the string
+    $dsn = "pgsql:host=$host;port=$port;dbname=$db"; 
+    
     $pdo = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
-    echo "Connected to Supabase successfully!";
+    
+    // Remove the echo "Connected" once it works to avoid issues with header redirects
 } catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
+    die("Connection failed: " . $e->getMessage());
 }
 ?>
