@@ -14,14 +14,24 @@ if (isset($_GET['action']) && isset($_GET['user_id'])) {
     $action = $_GET['action'];
     $val = ($action === 'block') ? 1 : 0;
 
+    // --- Get user full name first ---
+    $stmt_user = $pdo->prepare("SELECT full_name FROM users WHERE id = ?");
+    $stmt_user->execute([$user_id]);
+    $user_data = $stmt_user->fetch(PDO::FETCH_ASSOC);
+    $user_name = $user_data['full_name'] ?? "Unknown";
+
+    // --- Update block/unblock status ---
     $sql_act = "UPDATE users SET is_blocked = ? WHERE id = ? AND role = 'visitor'";
     $stmt_act = $pdo->prepare($sql_act);
     $stmt_act->execute([$val, $user_id]);
 
+    // --- Log the activity ---
+    $activity_text = ($action === 'block') ? "Blocked user: $user_name" : "Unblocked user: $user_name";
+    logActivity($pdo, $activity_text, $_SESSION['admin']);
+
     header("Location: dashboard.php");
     exit();
 }
-
 $today = date("Y-m-d");
 $currentMonth = (int)date("m");
 $currentYear = (int)date("Y");
