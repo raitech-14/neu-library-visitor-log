@@ -5,16 +5,11 @@ $db   = getenv('DB_NAME');
 $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
 
-try {
-    // Ensure there are no spaces or typos inside the string
-    $dsn = "pgsql:host=$host;port=$port;dbname=$db"; 
-    
-    $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
-    
-    // Remove the echo "Connected" once it works to avoid issues with header redirects
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+// Create PostgreSQL connection
+$conn = pg_connect("host=$host port=$port dbname=$db user=$user password=$pass");
+
+if (!$conn) {
+    die("PostgreSQL connection failed.");
 }
+// Connection successful, ready for callback.php
 ?>
