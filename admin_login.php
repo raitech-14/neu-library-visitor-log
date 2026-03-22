@@ -13,14 +13,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = md5($_POST['password']); 
 
     $sql = "SELECT * FROM users WHERE email = ? AND password = ? AND role = 'admin'";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $email, $password);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$email, $password]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result->num_rows > 0) {
-        $_SESSION['admin'] = $email;
-        logActivity($pdo, "Admin logged in", $email);
+        $_SESSION['admin'] = $admin['email'];
+        $_SESSION['admin_name'] = $admin['full_name'];
+
+        logActivity($pdo, "Admin logged in", $admin['full_name']);
+        
         header("Location: dashboard.php");
         exit();
     } else {
