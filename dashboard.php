@@ -660,7 +660,7 @@ foreach ($college_result as $college) {
                                 <?php echo date("h:i A", strtotime($act['visit_time'])); ?>
                             </span>
                         </li>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <li>No recent activity.</li>
                 <?php endif; ?>
@@ -742,7 +742,7 @@ foreach ($college_result as $college) {
                                         <?php endif; ?>
                                     </td>
                                 </tr>
-                            <?php endwhile; ?>
+                            <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
                                 <td colspan="9">No visitor logs found.</td>
