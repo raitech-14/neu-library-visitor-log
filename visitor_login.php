@@ -1,7 +1,11 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Manila');
-include 'db.php'; // This must provide $pdo
+include 'db.php'; 
+include 'functions.php';
+
+// PDO to pg_connect for logActivity
+$conn = pg_connect("host=aws-1-ap-northeast-2.pooler.supabase.com port=6543 dbname=postgres user=postgres.qwhuiudqwvknzrzfawca password=raizavisaya.28");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name = trim($_POST['full_name']);
@@ -38,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user) {
         // Check if blocked
         if ($user['is_blocked'] == 1) {
+            logActivity($conn, "Attempted login by blocked user: " . $user['full_name']); 
             $_SESSION['blocked_name'] = $user['full_name'];
             header("Location: blocked.php");
             exit();
@@ -46,18 +51,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Update existing user
         $update_sql = "UPDATE users SET full_name = ?, college = ?, visitor_type = ? WHERE email = ?";
         $pdo->prepare($update_sql)->execute([$full_name, $college, $visitor_type, $email]);
-
         $user_id = $user['id'];
+
+        logActivity($conn, "Updated visitor info: " . $full_name . " (" . $email . ")"); 
     } else {
-        // Insert new user
+        
         $role = "visitor";
-        // Postgres uses 'RETURNING id' to get the last ID immediately
         $insert_user = "INSERT INTO users (email, full_name, college, role, visitor_type) VALUES (?, ?, ?, ?, ?) RETURNING id";
         $stmt_insert = $pdo->prepare($insert_user);
         $stmt_insert->execute([$email, $full_name, $college, $role, $visitor_type]);
         
         $new_user = $stmt_insert->fetch(PDO::FETCH_ASSOC);
         $user_id = $new_user['id'];
+        logActivity($conn, "New visitor added: " . $full_name . " (" . $email . ")"); 
     }
 
     // 2. Record the visit
@@ -66,6 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $insert_log = "INSERT INTO visit_logs (user_id, purpose, visit_date, visit_time) VALUES (?, ?, ?, ?)";
     $pdo->prepare($insert_log)->execute([$user_id, $purpose, $visit_date, $visit_time]);
+    logActivity($conn, "Visitor checked in: " . $full_name . " for " . $purpose);
 
     $_SESSION['visitor_name'] = $full_name;
     $_SESSION['purpose'] = $purpose;
