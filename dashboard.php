@@ -1,7 +1,7 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Manila');
-include 'db.php'; // This must provide the $pdo variable
+include 'db.php'; 
 
 if (!isset($_SESSION['admin'])) {
     header("Location: admin_login.php");
@@ -13,7 +13,6 @@ if (isset($_GET['action']) && isset($_GET['user_id'])) {
     $action = $_GET['action'];
     $val = ($action === 'block') ? 1 : 0;
 
-    // Fixed for PDO
     $sql_act = "UPDATE users SET is_blocked = ? WHERE id = ? AND role = 'visitor'";
     $stmt_act = $pdo->prepare($sql_act);
     $stmt_act->execute([$val, $user_id]);
@@ -26,21 +25,17 @@ $today = date("Y-m-d");
 $currentMonth = (int)date("m");
 $currentYear = (int)date("Y");
 
-// Daily Stats - Fixed for PDO
 $daily_stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE visit_date = ?");
 $daily_stmt->execute([$today]);
 $daily = $daily_stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-// Weekly Stats - PostgreSQL version of YEARWEEK
 $weekly_query = $pdo->query("SELECT COUNT(*) AS total FROM visit_logs WHERE date_trunc('week', visit_date) = date_trunc('week', now())");
 $weekly = $weekly_query->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-// Monthly Stats - PostgreSQL version of MONTH/YEAR
 $monthly_stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM visit_logs WHERE EXTRACT(MONTH FROM visit_date) = ? AND EXTRACT(YEAR FROM visit_date) = ?");
 $monthly_stmt->execute([$currentMonth, $currentYear]);
 $monthly = $monthly_stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-// Total Users
 $total_users_query = $pdo->query("SELECT COUNT(*) AS total FROM users WHERE role = 'visitor'");
 $total_users = $total_users_query->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
@@ -72,11 +67,11 @@ $sql .= " ORDER BY visit_logs.visit_date DESC, visit_logs.visit_time DESC, visit
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
-// We fetch it all as an array so your existing loops work
+
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC); 
 $total_results = count($result);
 
-// College Chart Data
+
 $college_sql = "SELECT users.college, COUNT(visit_logs.id) AS total
                 FROM visit_logs
                 INNER JOIN users ON visit_logs.user_id = users.id
@@ -85,7 +80,7 @@ $college_sql = "SELECT users.college, COUNT(visit_logs.id) AS total
                 ORDER BY total DESC";
 $college_result = $pdo->query($college_sql)->fetchAll(PDO::FETCH_ASSOC);
 
-// Recent Activity
+
 $activity_sql = "SELECT users.full_name, visit_logs.visit_time, visit_logs.visit_date
                  FROM visit_logs
                  INNER JOIN users ON visit_logs.user_id = users.id
@@ -557,7 +552,7 @@ foreach ($college_result as $college) {
     <div class="topbar">
 
     <div class="topbar-left">
-        <img src="assets/logo.png" class="logo-img">
+        <img src="logo.png" class="logo-img">
 
         <div class="logo-text">
             <h2>NEU Library</h2>
