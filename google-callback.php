@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once 'google-config.php';
-include 'db.php'; // PostgreSQL connection
+include 'db.php'; // PDO connection
 
 // Step 1: Get the authorization code from Google
 if (!isset($_GET['code'])) {
@@ -25,18 +25,15 @@ $client->setAccessToken($token['access_token']);
 // Step 5: Get user info
 $google_service = new Google_Service_Oauth2($client);
 $google_user = $google_service->userinfo->get();
-
 $email = $google_user->email;
 
-// Step 6: Check if this email exists in your users table as admin (PostgreSQL)
-$sql = "SELECT * FROM users WHERE email = $1 AND role = 'admin'";
-$result = pg_query_params($conn, $sql, array($email));
+// Step 6: Check if this email exists in your users table as admin using PDO
+$sql = "SELECT * FROM users WHERE email = :email AND role = 'admin'";
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['email' => $email]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$result) {
-    die("Database query error: " . pg_last_error($conn));
-}
-
-if (pg_num_rows($result) > 0) {
+if ($user) {
     // Admin exists, log them in
     $_SESSION['admin'] = $email;
     header("Location: dashboard.php");
