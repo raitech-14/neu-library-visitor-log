@@ -2,6 +2,7 @@
 session_start();
 require_once 'google-config.php';
 include 'db.php';
+include 'functions.php';
 
 $google_login_url = $client->createAuthUrl();
 
@@ -19,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $_SESSION['admin'] = $email;
+        logActivity($pdo, "Admin logged in", $email);
         header("Location: dashboard.php");
         exit();
     } else {
