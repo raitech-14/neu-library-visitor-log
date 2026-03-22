@@ -2,6 +2,7 @@
 session_start();
 date_default_timezone_set('Asia/Manila');
 include 'db.php'; 
+include 'functions.php';
 
 if (!isset($_SESSION['admin'])) {
     header("Location: admin_login.php");
@@ -88,13 +89,21 @@ $activity_sql = "SELECT users.full_name, visit_logs.visit_time, visit_logs.visit
                  LIMIT 5";
 $activity_result = $pdo->query($activity_sql)->fetchAll(PDO::FETCH_ASSOC);
 
+// --- Chart Data Logic ---
 $collegeLabels = [];
 $collegeCounts = [];
 
 foreach ($college_result as $college) {
     $collegeLabels[] = !empty($college['college']) ? $college['college'] : 'N/A';
     $collegeCounts[] = (int)$college['total'];
-}
+} // Closed the bracket here!
+
+// --- Recent Activities Logic (From your activities table) ---
+$recent_activities_query = "SELECT * FROM activities ORDER BY created_at DESC LIMIT 5";
+$recent_activities_result = $pdo->query($recent_activities_query);
+
+// This ensures $recent_activities is a safe array to use in your HTML
+$recent_activities = $recent_activities_result ? $recent_activities_result->fetchAll(PDO::FETCH_ASSOC) : [];
 ?>
 
 <!DOCTYPE html>
@@ -641,26 +650,30 @@ foreach ($college_result as $college) {
         </div>
 
         <div class="glass-card recent-card mt-3">
-            <div class="section-title" style="font-size: 20px; margin-bottom: 10px;">
-                Recent Activity
-            </div>
+    <div class="section-title" style="font-size: 20px; margin-bottom: 10px;">
+        Recent Activity
+    </div>
 
-            <ul class="recent-list">
-                <?php if (!empty($activity_result)): ?>
-                    <?php foreach ($activity_result as $act): ?>
-                        <li>
-                            <strong><?php echo htmlspecialchars($act['full_name']); ?></strong>
-                            <span>
-                                checked in — 
-                                <?php echo date("h:i A", strtotime($act['visit_time'])); ?>
-                            </span>
-                        </li>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <li>No recent activity.</li>
-                <?php endif; ?>
-            </ul>
-        </div>
+    <ul class="recent-list">
+        <?php if (!empty($recent_activities)): ?>
+            <?php foreach ($recent_activities as $act): ?>
+                <?php 
+                    // Handle Admin Name or System fallback
+                    $admin = !empty($act['admin_name']) ? htmlspecialchars($act['admin_name']) : "System";
+                    // Format the timestamp for readability
+                    $time = date("h:i A", strtotime($act['created_at']));
+                ?>
+                <li>
+                    <strong><?php echo htmlspecialchars($act['activity']); ?></strong>
+                    <br>
+                    <small style="color: #cbd5ff;">By <?php echo $admin; ?> at <?php echo $time; ?></small>
+                </li>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <li>No recent activity logs.</li>
+        <?php endif; ?>
+    </ul>
+</div>
 
     </div>
 
