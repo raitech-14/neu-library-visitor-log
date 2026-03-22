@@ -94,7 +94,7 @@ if (isset($_SESSION['message'])) {
         body {
             margin: 0;
             min-height: 100vh;
-            background: url('assets/background.png') no-repeat center center/cover;
+            background: url('background.png') no-repeat center center/cover;
             position: relative;
         }
 
@@ -139,16 +139,57 @@ if (isset($_SESSION['message'])) {
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .login-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 6px; color: #fff; }
-        .login-subtitle { text-align: center; font-size: 13px; color: #cbd5ff; margin-bottom: 16px; }
+        .login-title { 
+            font-size: 24px; 
+            font-weight: 700; 
+            text-align: center; 
+            margin-bottom: 6px; 
+            color: #fff; 
+        }
+        .login-subtitle { 
+            text-align: center; 
+            font-size: 13px; color: #cbd5ff; 
+            margin-bottom: 16px; }
 
-        .form-control, .form-select { height: 40px; border-radius: 6px; font-size: 14px; margin-bottom: 10px; background: #f3f4f6; }
-        .btn-login { width: 100%; height: 40px; border-radius: 6px; font-size: 15px; background: #4d8df7; border: none; color: #fff; }
-        .btn-login:hover { background: #3f7ae0; }
+        .form-control, .form-select { 
+            height: 40px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            margin-bottom: 10px; 
+            background: #f3f4f6; 
+        }
+        
+        .btn-login { 
+            width: 100%; 
+            height: 40px; 
+            border-radius: 6px; 
+            font-size: 15px; 
+            background: #4d8df7; 
+            border: none; color: #fff; 
+        }
+        
+        .btn-login:hover { 
+            background: #3f7ae0; 
+        }
 
-        .alert { font-size: 13px; padding: 8px; margin-bottom: 12px; }
-        .bottom-link { margin-top: 12px; text-align: center; font-size: 13px; color: #dbe4ff; }
-        .bottom-link a { color: #ffffff; font-weight: 600; text-decoration: underline; }
+        .alert { 
+            font-size: 13px; 
+            padding: 8px; 
+            margin-bottom: 12px; 
+        }
+        
+        .bottom-link { 
+            margin-top: 12px; 
+            text-align: center; 
+            font-size: 13px; 
+            color: #dbe4ff; 
+        }
+        
+        .bottom-link a { 
+            color: #ffffff; 
+            font-weight: 600; 
+            text-decoration: underline; 
+        }
 
         @media (max-width: 768px) {
             .page-wrap { flex-direction: column; text-align: center; padding: 30px; }   
@@ -163,7 +204,7 @@ if (isset($_SESSION['message'])) {
 <div class="page-wrap">
 
     <div class="left-panel">
-        <img src="assets/logo.png" class="main-logo">
+        <img src="logo.png" class="main-logo">
         <h2 class="uni-name">New Era University</h2>
         <h1 class="library-text">Library</h1>
         <p class="sub-text">Visitor Log System</p>
