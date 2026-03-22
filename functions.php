@@ -1,19 +1,13 @@
 <?php
-$host = 'YOUR_HOST';
-$port = '5432';
-$db   = 'YOUR_DB';
-$user = 'YOUR_USER';
-$pass = 'YOUR_PASSWORD';
+include_once 'db.php'; 
 
-$conn = pg_connect("host=$host port=$port dbname=$db user=$user password=$pass");
-if (!$conn) {
-    die("Connection failed: " . pg_last_error());
-}
-
-function logActivity($conn, $activity, $admin_name = null) {
-    $query = "INSERT INTO activities (activity, admin_name) VALUES ($1, $2)";
-    $result = pg_query_params($conn, $query, array($activity, $admin_name));
-    if (!$result) {
-        error_log("Activity log failed: " . pg_last_error($conn));
+function logActivity($pdo, $activity, $admin_name = null) {
+    try {
+        $sql = "INSERT INTO activities (activity, admin_name, created_at) VALUES (?, ?, NOW())";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$activity, $admin_name]);
+    } catch (PDOException $e) {
+        // This logs the error to your server logs instead of showing it to the user
+        error_log("Activity log failed: " . $e->getMessage());
     }
 }
