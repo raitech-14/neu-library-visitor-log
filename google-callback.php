@@ -4,12 +4,17 @@ require_once 'google-config.php';
 include 'db.php'; 
 
 function logActivity($pdo, $action, $user_email) {
-    $sql = "INSERT INTO activity_logs (action, user_email, created_at) VALUES (:action, :user_email, NOW())";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        'action' => $action,
-        'user_email' => $user_email
-    ]);
+    try {
+        $sql = "INSERT INTO activities (action, user_email) VALUES (:action, :user_email)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            'action' => $action,
+            'user_email' => $user_email
+        ]);
+    } catch (PDOException $e) {
+        
+        error_log("Logging Error: " . $e->getMessage());
+    }
 }
 
 if (!isset($_GET['code'])) {
