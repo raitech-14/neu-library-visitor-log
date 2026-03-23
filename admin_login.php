@@ -8,22 +8,6 @@ $google_login_url = $client->createAuthUrl();
 
 $message = "";
 
-function logActivity($pdo, $activity_text, $admin_identifier) {
-    try {
-   
-        $sql = "INSERT INTO activities (activity, admin_name) VALUES (:activity, :admin_name)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            'activity'   => $activity_text,
-            'admin_name' => $admin_identifier
-        ]);
-    } catch (PDOException $e) {
-     
-        error_log("Logging Error: " . $e->getMessage());
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
