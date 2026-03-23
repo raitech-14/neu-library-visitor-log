@@ -29,6 +29,7 @@ try {
 
     if ($user) {
         $_SESSION['admin'] = $email;
+        logActivity($pdo, "Admin logged in via Google", $email);
         header("Location: dashboard.php");
         exit();
     } else {
