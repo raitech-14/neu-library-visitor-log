@@ -7,6 +7,7 @@ include 'functions.php';
 $google_login_url = $client->createAuthUrl();
 
 $message = "";
+?>
 
 <!DOCTYPE html>
 <html lang="en">
