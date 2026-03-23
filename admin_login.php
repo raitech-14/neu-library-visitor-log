@@ -8,28 +8,20 @@ $google_login_url = $client->createAuthUrl();
 
 $message = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = trim($_POST['email']);
-    $password = md5($_POST['password']); 
-
-    $sql = "SELECT * FROM users WHERE email = ? AND password = ? AND role = 'admin'";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$email, $password]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($result->num_rows > 0) {
-        $_SESSION['admin'] = $admin['email'];
-        $_SESSION['admin_name'] = $admin['full_name'];
-
-        logActivity($pdo, "Admin logged in", $admin['full_name']);
-        
-        header("Location: dashboard.php");
-        exit();
-    } else {
-        $message = "Invalid admin credentials.";
+function logActivity($pdo, $activity_text, $admin_identifier) {
+    try {
+   
+        $sql = "INSERT INTO activities (activity, admin_name) VALUES (:activity, :admin_name)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            'activity'   => $activity_text,
+            'admin_name' => $admin_identifier
+        ]);
+    } catch (PDOException $e) {
+     
+        error_log("Logging Error: " . $e->getMessage());
     }
 }
-?>
 
 <!DOCTYPE html>
 <html lang="en">
