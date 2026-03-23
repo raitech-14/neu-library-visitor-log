@@ -2,7 +2,15 @@
 session_start();
 require_once 'google-config.php';
 include 'db.php'; 
-include 'function.php';
+
+function logActivity($pdo, $action, $user_email) {
+    $sql = "INSERT INTO activity_logs (action, user_email, created_at) VALUES (:action, :user_email, NOW())";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        'action' => $action,
+        'user_email' => $user_email
+    ]);
+}
 
 if (!isset($_GET['code'])) {
     header("Location: admin_login.php");
