@@ -1,7 +1,8 @@
 <?php
 session_start();
 require_once 'google-config.php';
-include 'db.php'; // Now provides $pdo
+include 'db.php'; 
+include 'function.php';
 
 if (!isset($_GET['code'])) {
     header("Location: admin_login.php");
