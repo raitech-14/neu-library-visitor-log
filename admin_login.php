@@ -22,6 +22,7 @@ function logActivity($pdo, $activity_text, $admin_identifier) {
         error_log("Logging Error: " . $e->getMessage());
     }
 }
+?>
 
 <!DOCTYPE html>
 <html lang="en">
