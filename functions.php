@@ -1,4 +1,3 @@
-PHP
 <?php
 // functions.php
 include_once 'db.php'; 
